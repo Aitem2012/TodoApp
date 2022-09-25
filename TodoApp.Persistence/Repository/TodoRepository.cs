@@ -11,6 +11,7 @@ namespace TodoApp.Persistence.Repository
         private readonly IAppDbContext _context;
         private readonly IMapper _mapper;
 
+
         public TodoRepository(IAppDbContext context, IMapper mapper)
         {
             _context = context;
@@ -20,6 +21,7 @@ namespace TodoApp.Persistence.Repository
         public async Task<GetTodoDto> CreateTodo(CreateTodoDto model)
         {
             var todo = _mapper.Map<Domain.Todos.Todo>(model);
+            todo.DateCreated = DateTime.Now;
             _context.Todos.Add(todo);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)
@@ -58,6 +60,7 @@ namespace TodoApp.Persistence.Repository
         {
             var todoInDb = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(model.Id));
             var todo = _mapper.Map(model, todoInDb);
+            todo.DateUpdated = DateTime.Now;
             _context.Todos.Attach(todo);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)

@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-
+@import '~font-awesome/css/font-awesome.css';
 /* Provide sufficient contrast against white background */
 a {
   color: #0366d6;
@@ -14,3 +14,18 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+.btn-danger{
+    color:#000;
+}
+.btn-danger:hover{
+    color: #f00;
+}
+
+.btn-edit{
+    color: #000;
+}
+.btn-edit:hover{
+    color: #00f;
+}
+

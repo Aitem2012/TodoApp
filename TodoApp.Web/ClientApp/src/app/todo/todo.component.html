@@ -1,0 +1,28 @@
+<h1 id="tableLabel">Welcome to my Todo</h1>
+
+<p>My Todo.</p>
+
+<p *ngIf="!todos"><em>Loading...</em></p>
+
+<table class='table table-striped' aria-labelledby="tableLabel" *ngIf="todos">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Is Done</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let todo of todos">
+      <td>{{ todo.time }}</td>
+      <td>{{ todo.title }}</td>
+      <td>{{ todo.description }}</td>
+      <td>{{ todo.isDone }}</td>
+      <td><a role="button" class="btn-edit" (click)="edit(todo.id)"><i class="fa fa-pencil"></i></a></td>
+      <td><a (click)="delete(todo.id)" role="button" class="btn-danger"><i class="fa fa-trash"></i></a> </td>
+    </tr>
+  </tbody>
+</table>
