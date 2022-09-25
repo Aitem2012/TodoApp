@@ -16,28 +16,36 @@ export class TodoFormComponent implements OnInit {
   constructor(private http:HttpClient, private router: ActivatedRoute) {
     
   }
-  onSubmit(form: NgForm) {
-    console.log("Your form data:", form.value);
-    this.todo = form.value;
+  onSubmit(myForm: NgForm) {
+    console.log("Your form data:", myForm.value);
+    this.todo = myForm.value;
     console.log(this.todo);
     this.http.post('https://localhost:7115/' + 'api/todos/createtodo', this.todo)
       .subscribe(
         (response) => console.log(response),
         (error) => console.log(error)
     );
-    form.reset();
+    myForm.reset();
   }
 
   ngOnInit() {
     this.router.params.subscribe(params => this.id = params.id);
     console.log(this.id);
-    this.http.get<Todo>('https://localhost:7115/' + 'api/todos/gettodobyid/' + this.id)
-      .subscribe((data) => {
-        this.todo = data;
-        console.log(this.todo);
-      }, (error) => {
-        console.log(error)
-      })
+    if (this.id) {
+      this.http.get<Todo>('https://localhost:7115/' + 'api/todos/gettodobyid/' + this.id)
+        .subscribe((data) => {
+          this.todo = data;
+          this.myForm?.value({
+            title: this.todo.title
+          });
+          console.log(this.todo);
+        }, (error) => {
+          console.log(error)
+        })
+     
+      
+    }
+    
 
   }
 

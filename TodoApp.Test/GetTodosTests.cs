@@ -12,13 +12,23 @@ namespace TodoApp.Test
         {
             var todoRepo = new Mock<ITodoRepository>();
             var todoController = new TodosController(todoRepo.Object);
+            var todoDto = new CreateTodoDto
+            {
+                Time = DateTime.Now.AddHours(6),
+                Title = "Some title",
+                Description = "Some description",
+                IsDone = false,
+            };
 
-            todoRepo.Setup(x => x.CreateTodo(new CreateTodoDto { Description = "This is a description", IsDone = true, Time = DateTime.Now.AddHours(6), Title = "The Title" }).IsCompleted);
-            var todoId = Guid.Parse("F68C59EB-BF6B-47C4-A7F5-2632CC1A3199");
+            todoRepo.Setup(x => x.CreateTodo(todoDto).Result).Returns(new GetTodoDto());
 
-            var res = await todoController.GetTodos();
+
+            var res = todoController.GetTodos().Result;
+
             Assert.NotNull(res);
         }
+
+
     }
 }
 

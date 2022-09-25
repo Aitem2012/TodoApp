@@ -12,21 +12,34 @@ namespace TodoApp.Persistence.Repository
         private readonly IMapper _mapper;
 
 
-        public TodoRepository(IAppDbContext context, IMapper mapper)
+        public TodoRepository(IAppDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<GetTodoDto> CreateTodo(CreateTodoDto model)
         {
-            var todo = _mapper.Map<Domain.Todos.Todo>(model);
+            var todo = new Domain.Todos.Todo
+            {
+                Id = Guid.NewGuid(),
+                Title = model.Title,
+                Time = model.Time,
+                Description = model.Description,
+                IsDone = model.IsDone
+            };
             todo.DateCreated = DateTime.Now;
             _context.Todos.Add(todo);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)
             {
-                return _mapper.Map<GetTodoDto>(todo);
+                return new GetTodoDto()
+                {
+                    Id = todo.Id,
+                    Title = todo.Title,
+                    Description = todo.Description,
+                    Time = todo.Time,
+                    IsDone = todo.IsDone
+                };
             }
             return null;
         }
@@ -34,6 +47,10 @@ namespace TodoApp.Persistence.Repository
         public async Task<bool> DeleteTodo(Guid id)
         {
             var todo = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(id));
+            if (todo == null)
+            {
+                return false;
+            }
             _context.Todos.Remove(todo);
             return await _context.SaveChangesAsync(CancellationToken.None) > 0;
         }
@@ -41,31 +58,83 @@ namespace TodoApp.Persistence.Repository
         public async Task<IEnumerable<GetTodoDto>> GetAllTodos()
         {
             var todos = await _context.Todos.ToListAsync();
-            return _mapper.Map<IEnumerable<GetTodoDto>>(todos);
+            var todosToReturn = new List<GetTodoDto>();
+            foreach (var todo in todos)
+            {
+                todosToReturn.Add(new GetTodoDto
+                {
+                    Id = todo.Id,
+                    Title = todo.Title,
+                    Description = todo.Description,
+                    Time = todo.Time,
+                    IsDone = todo.IsDone
+                });
+            }
+            return todosToReturn;
         }
 
         public async Task<GetTodoDto> GetTodoById(Guid id)
         {
             var todo = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(id));
-            return _mapper.Map<GetTodoDto>(todo);
+            if (todo == null)
+            {
+                return null;
+            }
+            return new GetTodoDto()
+            {
+                Id = todo.Id,
+                Title = todo.Title,
+                Description = todo.Description,
+                Time = todo.Time,
+                IsDone = todo.IsDone
+            };
         }
 
         public async Task<IEnumerable<GetTodoDto>> GetTodosByStatus(bool isDone = true)
         {
             var todos = await _context.Todos.Where(x => x.IsDone.Equals(isDone)).ToListAsync();
-            return _mapper.Map<IEnumerable<GetTodoDto>>(todos);
+            var todosToReturn = new List<GetTodoDto>();
+            foreach (var todo in todos)
+            {
+                todosToReturn.Add(new GetTodoDto
+                {
+                    Id = todo.Id,
+                    Title = todo.Title,
+                    Description = todo.Description,
+                    Time = todo.Time,
+                    IsDone = todo.IsDone
+                });
+            }
+            return todosToReturn;
         }
 
         public async Task<GetTodoDto> UpdateTodo(UpdateTodoDto model)
         {
             var todoInDb = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(model.Id));
-            var todo = _mapper.Map(model, todoInDb);
-            todo.DateUpdated = DateTime.Now;
-            _context.Todos.Attach(todo);
+            if (todoInDb == null)
+            {
+                return null;
+            }
+
+            todoInDb.Id = model.Id;
+            todoInDb.Title = model.Title;
+            todoInDb.Time = model.Time;
+            todoInDb.Description = model.Description;
+            todoInDb.IsDone = model.IsDone;
+
+            todoInDb.DateUpdated = DateTime.Now;
+            _context.Todos.Attach(todoInDb);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)
             {
-                return _mapper.Map<GetTodoDto>(todo);
+                return new GetTodoDto()
+                {
+                    Id = todoInDb.Id,
+                    Title = todoInDb.Title,
+                    Description = todoInDb.Description,
+                    Time = todoInDb.Time,
+                    IsDone = todoInDb.IsDone
+                };
             }
             return null;
 
