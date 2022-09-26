@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-todo-component',
+  selector: 'app-todo',
   templateUrl: './todo.component.html',
 })
 export class TodoComponent {
