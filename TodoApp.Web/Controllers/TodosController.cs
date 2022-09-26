@@ -68,7 +68,7 @@ namespace TodoApp.Web.Controllers
             {
                 return BadRequest();
             }
-            return Ok(res);
+            return NoContent();
         }
     }
 }

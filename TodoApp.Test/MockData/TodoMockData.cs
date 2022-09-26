@@ -1,4 +1,5 @@
-﻿using TodoApp.Domain.Todos;
+﻿using TodoApp.Application.Dto;
+using TodoApp.Domain.Todos;
 
 namespace TodoApp.Test.MockData
 {
@@ -18,14 +19,46 @@ namespace TodoApp.Test.MockData
         {
             return new List<Todo>();
         }
-        public static Todo GetTodo()
+        public static Todo GetTodo(Guid todoId)
         {
-            return new Todo { Id = Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"), Title = "Dry cleaner", Description = "Pick up clothes from drycleaner", Time = DateTime.Now.AddHours(4), IsDone = false };
+            return GetTodos().FirstOrDefault(x => x.Id.Equals(todoId));
+
         }
 
-        public static bool DeleteTodo()
+        public static bool DeleteTodo(Guid id)
         {
-            return true;
+            var todo = GetTodo(id);
+            var todos = GetTodos();
+            todos.Remove(todo);
+
+            return !todos.Contains(todo) && todo != null;
+        }
+
+        public static Todo UpdateTodo(Todo todo)
+        {
+            var todos = GetTodos().ToHashSet<Todo>();
+            var theTodos = todos.FirstOrDefault(x => x.Id.Equals(todo.Id));
+            if (theTodos != null)
+            {
+                todos.Add(todo);
+            }
+
+            return todos.Contains(todo) ? todo : null;
+
+        }
+        public static Todo CreateTodo(CreateTodoDto todo)
+        {
+            var todos = GetTodos();
+            var newTodo = new Todo
+            {
+                Id = Guid.NewGuid(),
+                Title = todo.Title,
+                Description = todo.Description,
+                Time = todo.Time,
+                IsDone = todo.IsDone
+            };
+            todos.Add(newTodo);
+            return todos.Contains(newTodo) ? newTodo : null;
         }
     }
 }

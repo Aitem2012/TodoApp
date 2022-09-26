@@ -350,9 +350,10 @@ MigrationBackup/
 *.sln.iml
 
 obj
-.vscode
 bin
 .dockerignore
 *.db
 *.db-shm
 *.db-wal
+temp_auto_push.bat
+temp_interactive_push.bat

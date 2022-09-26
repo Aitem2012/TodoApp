@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using TodoApp.Application.Abstract.Repositories;
 using TodoApp.Application.Dto;
 using TodoApp.Domain.Todos;
-using TodoApp.Persistence.Context;
-using TodoApp.Persistence.Repository;
-using TodoApp.Test.Db;
 using TodoApp.Test.MockData;
 using TodoApp.Web.Controllers;
 
@@ -14,24 +10,6 @@ namespace TodoApp.Test.Controllers
 {
     public class TestTodoController
     {
-        private TodoRepository _repository;
-        public static DbContextOptions<AppDbContext> dbContext { get; }
-        public static string conn = "Data source=TodoAppTest";
-
-        static TestTodoController()
-        {
-            dbContext = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(conn)
-                .Options;
-        }
-        public TestTodoController()
-        {
-            var context = new AppDbContext(dbContext);
-            DummyDbInitializer db = new DummyDbInitializer();
-            db.Seed(context);
-
-            _repository = new TodoRepository(context);
-        }
 
         [Fact]
         public async void GetAllTodos_ShouldReturn200StatusCode()
@@ -69,7 +47,7 @@ namespace TodoApp.Test.Controllers
         {
             //Arrange
             var todoRepo = new Mock<ITodoRepository>();
-            todoRepo.Setup(x => x.GetTodoById(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"))).ReturnsAsync(TodoMockData.GetTodo());
+            todoRepo.Setup(x => x.GetTodoById(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"))).ReturnsAsync(TodoMockData.GetTodo(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee")));
             var sut = new TodosController(todoRepo.Object);
 
             //Act
@@ -85,7 +63,7 @@ namespace TodoApp.Test.Controllers
         {
             //Arrange
             var todoRepo = new Mock<ITodoRepository>();
-            todoRepo.Setup(x => x.GetTodoById(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"))).ReturnsAsync(TodoMockData.GetTodo());
+            todoRepo.Setup(x => x.GetTodoById(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"))).ReturnsAsync(TodoMockData.GetTodo(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee")));
             var sut = new TodosController(todoRepo.Object);
 
             //Act
@@ -97,16 +75,20 @@ namespace TodoApp.Test.Controllers
         }
 
         [Fact]
-        public async void DeleteTodoById_ShouldReturn200StatusCode()
+        public async void DeleteTodoById_ShouldReturn204StatusCode()
         {
             //Arrange
-            var todoId = Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee");
-            var controller = new TodosController(_repository);
-            //Act
-            var sut = await controller.DeleteTodo(todoId);
+            var todoRepo = new Mock<ITodoRepository>();
+            todoRepo.Setup(x => x.DeleteTodo(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee")).Result).Returns(TodoMockData.DeleteTodo(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee")));
 
-            Assert.IsType<OkObjectResult>(sut);
-            Assert.True((sut as OkObjectResult).StatusCode.Equals(200));
+            var res = new TodosController(todoRepo.Object);
+
+            //Act
+            var sut = await res.DeleteTodo(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"));
+
+            Assert.IsType<NoContentResult>(sut);
+            Assert.True((sut as NoContentResult).StatusCode.Equals(204));
+            Assert.IsAssignableFrom<NoContentResult>(sut);
         }
 
         [Fact]
@@ -114,10 +96,15 @@ namespace TodoApp.Test.Controllers
         {
             //Arrange
             var todoId = Guid.Parse("8d48c1d1-cecc-4f0b-a1f6-4fbacca839ee");
-            var controller = new TodosController(_repository);
+            var todoRepo = new Mock<ITodoRepository>();
+            todoRepo.Setup(x => x.DeleteTodo(todoId).Result).Returns(TodoMockData.DeleteTodo(todoId));
+
+            var res = new TodosController(todoRepo.Object);
 
             //Act
-            var sut = await controller.DeleteTodo(todoId);
+            var sut = await res.DeleteTodo(todoId);
+
+
 
             //Assert
             Assert.IsType<BadRequestResult>(sut);
@@ -136,17 +123,19 @@ namespace TodoApp.Test.Controllers
                 IsDone = true,
                 Time = DateTime.Now.AddMinutes(25),
             };
-            var controller = new TodosController(_repository);
+            var todoRepo = new Mock<ITodoRepository>();
+            todoRepo.Setup(x => x.UpdateTodo(todo).Result).Returns(TodoMockData.UpdateTodo(todo));
 
+            var res = new TodosController(todoRepo.Object);
             //Act
-            var sut = await controller.UpdateTodo(todo);
+            var sut = await res.UpdateTodo(todo);
 
             //Assert
             Assert.IsType<OkObjectResult>(sut);
             Assert.True((sut as OkObjectResult).StatusCode.Equals(200));
         }
         [Fact]
-        public async void UpdateTodo_Returns_Null_When_Invalid_Id_Is_Given()
+        public async void UpdateTodo_ShouldReturns400StatusCode()
         {
             //Arrange
             var todo = new Todo
@@ -157,10 +146,12 @@ namespace TodoApp.Test.Controllers
                 IsDone = true,
                 Time = DateTime.Now.AddMinutes(25),
             };
-            var controller = new TodosController(_repository);
+            var todoRepo = new Mock<ITodoRepository>();
+            todoRepo.Setup(x => x.UpdateTodo(todo).Result).Returns(TodoMockData.UpdateTodo(todo));
 
+            var res = new TodosController(todoRepo.Object);
             //Act
-            var sut = await controller.UpdateTodo(todo);
+            var sut = await res.UpdateTodo(todo);
 
             //Assert
             Assert.IsType<BadRequestResult>(sut);
@@ -172,24 +163,19 @@ namespace TodoApp.Test.Controllers
         {
             //Arrange
             var todo = new CreateTodoDto { Title = "Car", Description = "Wash the car", Time = DateTime.Now.AddHours(6), IsDone = false };
-            var controller = new TodosController(_repository);
+            var todoRepo = new Mock<ITodoRepository>();
+            todoRepo.Setup(x => x.CreateTodo(todo).Result).Returns(TodoMockData.CreateTodo(todo));
+            var res = new TodosController(todoRepo.Object);
+
             //Act 
 
-            var sut = await controller.CreateTodo(todo);
+            var sut = await res.CreateTodo(todo);
 
             ///Assert
             Assert.NotNull(sut);
             Assert.IsType<OkObjectResult>(sut);
             Assert.True((sut as OkObjectResult).StatusCode.Equals(200));
         }
-        [Fact]
-        public void CreateTodo_With_Invalid_Data_Throws_Exception()
-        {
-            //Arrange
-            var todo = new CreateTodoDto { Title = "Car", Time = DateTime.Now.AddHours(6), IsDone = false };
-            var controller = new TodosController(_repository);
-            //Assert
-            var sut = Assert.ThrowsAny<Exception>(() => controller.CreateTodo(todo).Result);
-        }
+
     }
 }
