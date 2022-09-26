@@ -19,6 +19,10 @@ namespace TodoApp.Web.Controllers
         public async Task<IActionResult> GetTodos()
         {
             var todos = await _todoRepo.GetAllTodos();
+            if (!todos.Any())
+            {
+                return NoContent();
+            }
             return Ok(todos);
         }
 
@@ -26,6 +30,10 @@ namespace TodoApp.Web.Controllers
         public async Task<IActionResult> GetTodoById(Guid id)
         {
             var todo = await _todoRepo.GetTodoById(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
             return Ok(todo);
         }
         [HttpPost]
@@ -46,6 +54,10 @@ namespace TodoApp.Web.Controllers
                 return BadRequest(ModelState);
             }
             var todo = await _todoRepo.UpdateTodo(model);
+            if (todo == null)
+            {
+                return BadRequest();
+            }
             return Ok(todo);
         }
         [HttpDelete("{id}")]
@@ -54,7 +66,7 @@ namespace TodoApp.Web.Controllers
             var res = await _todoRepo.DeleteTodo(id);
             if (!res)
             {
-                return BadRequest("Todo could not be deleted");
+                return BadRequest();
             }
             return Ok(res);
         }

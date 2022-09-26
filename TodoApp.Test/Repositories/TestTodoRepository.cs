@@ -5,20 +5,20 @@ using TodoApp.Persistence.Context;
 using TodoApp.Persistence.Repository;
 using TodoApp.Test.Db;
 
-namespace TodoApp.Test
+namespace TodoApp.Test.Repositories
 {
-    public class TodosUnitTestController
+    public class TestTodoRepository
     {
         private TodoRepository _repository;
         public static DbContextOptions<AppDbContext> dbContext { get; }
         public static string conn = "Data source=TodoAppTest";
-        static TodosUnitTestController()
+        static TestTodoRepository()
         {
             dbContext = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite(conn)
                 .Options;
         }
-        public TodosUnitTestController()
+        public TestTodoRepository()
         {
             var context = new AppDbContext(dbContext);
             DummyDbInitializer db = new DummyDbInitializer();
@@ -72,25 +72,6 @@ namespace TodoApp.Test
             //Assert
             Assert.True(sut.Count() == 0);
         }
-        [Fact]
-        public async void GetTodoByStatus_Returns_Result_When_Match_Found()
-        {
-            //Arrange
-
-            //Act
-            // var sut = await _repository.GetTodosByStatus(false);
-
-            //Assert
-            Assert.True(true);
-        }
-        [Fact]
-        public async void GetTodosByStatus_Does_Not_Returns_Result_When_No_MatchFound()
-        {
-            ///Act
-            //var sut = await _repository.GetTodosByStatus(true);
-
-            Assert.False(true);
-        }
 
         [Fact]
         public async void CreateTodo_With_Valid_Data_Returns_Result()
@@ -123,6 +104,14 @@ namespace TodoApp.Test
         {
             //Arrange
             var todoInDb = await _repository.GetTodoById(Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"));
+            var previousData = new Todo
+            {
+                Id = todoInDb.Id,
+                Description = todoInDb.Description,
+                Time = todoInDb.Time,
+                Title = todoInDb.Title,
+                IsDone = todoInDb.IsDone
+            };
             var todo = new Todo
             {
                 Id = Guid.Parse("8d48c1d1-cecc-4f0b-a1f9-4fbacca839ee"),
@@ -137,9 +126,9 @@ namespace TodoApp.Test
             var sut = await _repository.UpdateTodo(todo);
 
             //Assert
-            Assert.Equal(todoInDb.Id, sut.Id);
-            Assert.NotEqual(todoInDb.Title, sut.Title);
-            Assert.NotEqual(todoInDb.Description, sut.Description);
+            Assert.Equal(previousData.Id, sut.Id);
+            Assert.NotEqual(previousData.Title, sut.Title);
+            Assert.NotEqual(previousData.Description, sut.Description);
         }
         [Fact]
         public async void UpdateTodo_Returns_Null_When_Invalid_Id_Is_Given()
