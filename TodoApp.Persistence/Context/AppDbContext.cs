@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
-using TodoApp.Application.Abstract.Persistence;
 
 namespace TodoApp.Persistence.Context
 {
-    public class AppDbContext : DbContext, IAppDbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<Domain.Todos.Todo> Todos { get; set; }
 
@@ -22,12 +21,6 @@ namespace TodoApp.Persistence.Context
             return new AppDbContext();
         }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            var result = await base.SaveChangesAsync(cancellationToken);
-
-            return result;
-        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

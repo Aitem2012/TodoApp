@@ -1,14 +1,14 @@
 ﻿using TodoApp.Application.Dto;
+using TodoApp.Domain.Todos;
 
 namespace TodoApp.Application.Abstract.Repositories
 {
     public interface ITodoRepository
     {
-        Task<GetTodoDto> CreateTodo(CreateTodoDto model);
-        Task<GetTodoDto> UpdateTodo(UpdateTodoDto model);
-        Task<IEnumerable<GetTodoDto>> GetAllTodos();
+        Task<Todo> CreateTodo(CreateTodoDto model);
+        Task<Todo> UpdateTodo(Todo model);
+        Task<IEnumerable<Todo>> GetAllTodos();
         Task<bool> DeleteTodo(Guid id);
-        Task<GetTodoDto> GetTodoById(Guid id);
-        Task<IEnumerable<GetTodoDto>> GetTodosByStatus(bool isDone = true);
+        Task<Todo> GetTodoById(Guid id);
     }
 }

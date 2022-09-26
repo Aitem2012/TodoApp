@@ -11,7 +11,7 @@ using TodoApp.Persistence.Context;
 namespace TodoApp.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220924163416_Init")]
+    [Migration("20220926064224_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,13 +25,8 @@ namespace TodoApp.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DateUpdated")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDone")
@@ -41,6 +36,7 @@ namespace TodoApp.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

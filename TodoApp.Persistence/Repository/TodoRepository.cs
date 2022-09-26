@@ -1,45 +1,35 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using TodoApp.Application.Abstract.Persistence;
+﻿using Microsoft.EntityFrameworkCore;
 using TodoApp.Application.Abstract.Repositories;
 using TodoApp.Application.Dto;
+using TodoApp.Persistence.Context;
 
 namespace TodoApp.Persistence.Repository
 {
     public class TodoRepository : ITodoRepository
     {
-        private readonly IAppDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly AppDbContext _context;
 
 
-        public TodoRepository(IAppDbContext context)
+        public TodoRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<GetTodoDto> CreateTodo(CreateTodoDto model)
+        public async Task<Domain.Todos.Todo> CreateTodo(CreateTodoDto model)
         {
             var todo = new Domain.Todos.Todo
             {
                 Id = Guid.NewGuid(),
-                Title = model.Title,
+                IsDone = model.IsDone,
                 Time = model.Time,
-                Description = model.Description,
-                IsDone = model.IsDone
+                Title = model.Title,
+                Description = model.Description
             };
-            todo.DateCreated = DateTime.Now;
             _context.Todos.Add(todo);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)
             {
-                return new GetTodoDto()
-                {
-                    Id = todo.Id,
-                    Title = todo.Title,
-                    Description = todo.Description,
-                    Time = todo.Time,
-                    IsDone = todo.IsDone
-                };
+                return todo;
             }
             return null;
         }
@@ -55,60 +45,23 @@ namespace TodoApp.Persistence.Repository
             return await _context.SaveChangesAsync(CancellationToken.None) > 0;
         }
 
-        public async Task<IEnumerable<GetTodoDto>> GetAllTodos()
+        public async Task<IEnumerable<Domain.Todos.Todo>> GetAllTodos()
         {
             var todos = await _context.Todos.ToListAsync();
-            var todosToReturn = new List<GetTodoDto>();
-            foreach (var todo in todos)
-            {
-                todosToReturn.Add(new GetTodoDto
-                {
-                    Id = todo.Id,
-                    Title = todo.Title,
-                    Description = todo.Description,
-                    Time = todo.Time,
-                    IsDone = todo.IsDone
-                });
-            }
-            return todosToReturn;
+            return todos;
         }
 
-        public async Task<GetTodoDto> GetTodoById(Guid id)
+        public async Task<Domain.Todos.Todo> GetTodoById(Guid id)
         {
             var todo = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(id));
             if (todo == null)
             {
                 return null;
             }
-            return new GetTodoDto()
-            {
-                Id = todo.Id,
-                Title = todo.Title,
-                Description = todo.Description,
-                Time = todo.Time,
-                IsDone = todo.IsDone
-            };
+            return todo;
         }
 
-        public async Task<IEnumerable<GetTodoDto>> GetTodosByStatus(bool isDone = true)
-        {
-            var todos = await _context.Todos.Where(x => x.IsDone.Equals(isDone)).ToListAsync();
-            var todosToReturn = new List<GetTodoDto>();
-            foreach (var todo in todos)
-            {
-                todosToReturn.Add(new GetTodoDto
-                {
-                    Id = todo.Id,
-                    Title = todo.Title,
-                    Description = todo.Description,
-                    Time = todo.Time,
-                    IsDone = todo.IsDone
-                });
-            }
-            return todosToReturn;
-        }
-
-        public async Task<GetTodoDto> UpdateTodo(UpdateTodoDto model)
+        public async Task<Domain.Todos.Todo> UpdateTodo(Domain.Todos.Todo model)
         {
             var todoInDb = await _context.Todos.SingleOrDefaultAsync(x => x.Id.Equals(model.Id));
             if (todoInDb == null)
@@ -121,20 +74,11 @@ namespace TodoApp.Persistence.Repository
             todoInDb.Time = model.Time;
             todoInDb.Description = model.Description;
             todoInDb.IsDone = model.IsDone;
-
-            todoInDb.DateUpdated = DateTime.Now;
             _context.Todos.Attach(todoInDb);
             var res = await _context.SaveChangesAsync(CancellationToken.None);
             if (res > 0)
             {
-                return new GetTodoDto()
-                {
-                    Id = todoInDb.Id,
-                    Title = todoInDb.Title,
-                    Description = todoInDb.Description,
-                    Time = todoInDb.Time,
-                    IsDone = todoInDb.IsDone
-                };
+                return todoInDb;
             }
             return null;
 

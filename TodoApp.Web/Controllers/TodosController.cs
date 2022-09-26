@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TodoApp.Application.Abstract.Repositories;
 using TodoApp.Application.Dto;
+using TodoApp.Domain.Todos;
 
 namespace TodoApp.Web.Controllers
 {
@@ -20,11 +21,7 @@ namespace TodoApp.Web.Controllers
             var todos = await _todoRepo.GetAllTodos();
             return Ok(todos);
         }
-        [HttpGet("get-todo-by-status")]
-        public async Task<IActionResult> GetTodosByStatus(bool isDone)
-        {
-            return Ok(await _todoRepo.GetTodosByStatus(isDone));
-        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTodoById(Guid id)
         {
@@ -42,7 +39,7 @@ namespace TodoApp.Web.Controllers
             return Ok(todo);
         }
         [HttpPut]
-        public async Task<IActionResult> UpdateTodo([FromBody] UpdateTodoDto model)
+        public async Task<IActionResult> UpdateTodo([FromBody] Todo model)
         {
             if (!ModelState.IsValid)
             {

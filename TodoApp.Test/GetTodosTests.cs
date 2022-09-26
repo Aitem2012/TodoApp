@@ -20,7 +20,7 @@ namespace TodoApp.Test
                 IsDone = false,
             };
 
-            todoRepo.Setup(x => x.CreateTodo(todoDto).Result).Returns(new GetTodoDto());
+            //todoRepo.Setup(x => x.CreateTodo(todoDto).Result).Returns(new GetTodoDto());
 
 
             var res = todoController.GetTodos().Result;

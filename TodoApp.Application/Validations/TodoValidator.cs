@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using TodoApp.Application.Dto;
+using TodoApp.Domain.Todos;
 
 namespace TodoApp.Application.Validations
 {
-    public class UpdateTodoDtoValidator : AbstractValidator<UpdateTodoDto>
+    public class TodoValidator : AbstractValidator<Todo>
     {
-        public UpdateTodoDtoValidator()
+        public TodoValidator()
         {
             RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("{propertyName} cannot be null or empty");
             RuleFor(x => x.Title).NotEmpty().NotNull().WithMessage("{propertyName} cannot be null or empty");
